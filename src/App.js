@@ -15,10 +15,9 @@ class App extends Component {
                     <h2>Welcome to React</h2>
                 </div>
                 <p className="App-intro">
-                    To get started, edit <code>src/App.js</code> and save to reload
                     <input
                         ref="newField"
-                        className="new-todo"
+                        className="the-token"
                         placeholder="Enter the encoded mambo jumbo"
                         onChange={e => this.handleChange(e)}
                         value={this.state.token}
