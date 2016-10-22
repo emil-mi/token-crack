@@ -1,24 +1,32 @@
+html {
+    height: 100%;
+}
+
 .App {
   text-align: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
 .App-header {
   background-color: #222;
-  height: 150px;
+  height: 70px;
   padding: 20px;
   color: white;
 }
 
 .App-intro {
+  padding: 20px;
   font-size: large;
 }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.the-token {
+    width: 100%;
+    height: 70px;
+    resize: none;
+}
+
+.the-result {
+}
+
+.date_future {
+    color: red;
 }
