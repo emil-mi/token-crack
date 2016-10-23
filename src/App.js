@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import './App.css';
 import _ from 'lodash';
 import JSONPretty from 'react-json-pretty';
+import base64 from 'base64-js';
+import utf8 from 'utf8';
 
 function getDefaultResult(token) {
     return token ? <div key="default-result"><span>Don't know</span></div> : "";
@@ -137,6 +139,57 @@ function match(re){
     return input=>input.match(re);
 }
 
+function readUint(byteArray) {
+    let result = 0;
+    let shift = 0;
+    let pos = 0;
+    while(true) {
+        let byte = byteArray[pos++];
+
+        result |= (byte & 0x7f) << shift;
+        if ((byte & 0x80) === 0) {
+            break;
+        }
+        shift += 7;
+    }
+    return [byteArray.slice(pos), result];
+}
+
+function readString(io) {
+    let len;
+    [io, len] = readUint(io);
+    let strBytes = String.fromCharCode(...io.slice(0, len));
+    return [io.slice(len), utf8.decode(strBytes)];
+}
+
+function readPassport(io) {
+
+}
+
+function deserializeAuthContext(byteArray) {
+    var prev, pos;
+    prev = pos = byteArray;
+
+    const authType = function(){ var result; [pos, result] = readString(prev = pos); return result; }();
+    const name = function(){ var result; [pos, result] = readString(prev = pos); return result; }();
+    const hasPassport = function(){ var result; [pos, result] = readUint(prev = pos); return result; }();
+
+    const passport = function(){
+        var result;
+        if (hasPassport) {
+            [pos, result] = readPassport(prev = pos);
+        }
+        return result;
+    }();
+
+    const numIds = function(){ var result; [pos, result] = readUint(prev = pos); return result; }();
+    const identifiers = [];
+    for(var i=0; i< numIds; i++) {
+        let identifier = function(){ var result; [pos, result] = readUint(prev = pos); return result; }();
+        identifiers.push(identifier);
+    }
+}
+
 /*
  Set-RegistrationToken:registrationToken=U2lnbmF0dXJlOjI6Mjg6QVFRQUFBREloK3BpYlMyaGd0VDN6R21sT2lvdTtWZXJzaW9uOjY6MToxO0lzc3VlVGltZTo0OjE5OjUyNDc4MTM3NTU0MTEwMDIzMjM7RXAuSWRUeXBlOjc6MToxO0VwLklkOjI6MjU6ZW1pbC5taWVpbGljYUBvdXRsb29rLmNvbTtFcC5FcGlkOjU6MzY6NGVlYjQ4MzAtZDM3Yy00M2I0LTg5ZTQtMTY1NzBjOTI3NjNlO0VwLkxvZ2luVGltZTo3OjE6MDtFcC5BdXRoVGltZTo0OjE5OjUyNDc4MTM3NTU0MDg2NTg1NTI7RXAuQXV0aFR5cGU6NzoyOjE1O0VwLkV4cFRpbWU6NDoxODo2MzYxMjg1OTIyNzAwMDAwMDA7VXNyLk5ldE1hc2s6MTE6MTozO1Vzci5YZnJDbnQ6NjoxOjE7VXNyLlJkcmN0RmxnOjI6MTA6R2VvSG9zdGluZztVc3IuRXhwSWQ6OToxOjA7VXNyLkV4cElkTGFzdExvZzo0OjE6MDtVc2VyLkF0aEN0eHQ6MjoyNzY6Q2xOcmVYQmxWRzlyWlc0WlpXMXBiQzV0YVdWcGJHbGpZVUJ2ZFhSc2IyOXJMbU52YlFFRFZXbGpGREV2TVM4d01EQXhJREV5T2pBd09qQXdJRUZOREU1dmRGTndaV05wWm1sbFpQaTFMRkt6MGV5ckFBQUFBQUFBUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUExbGJXbHNMbTFwWldsc2FXTmhBQUFBQUFBQUFBQUFCMDV2VTJOdmNtVUFBQUFBQkFBQUFBQUFBQUFBQUFBQStMVXNVclBSN0tzQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFFTlpXMXBiQzV0YVdWcGJHbGpZUUFBQUFBQUFBQUFBQT09Ow==; expires=1477263298; endpointId={4eeb4830-d37c-43b4-89e4-16570c92763e}
  */
@@ -147,7 +200,17 @@ function tryRegToken(token) {
             .trim()
             .split(";")[0];
 
-        return atob(token).split(";").map(v=> <div>{v}</div>);
+        var decoded = atob(token);
+
+        var entries = _.compact(decoded.split(";"))
+            .map(term=>{
+                let [key, , ,value] = term.split(":");
+                return {key, value};
+            })
+            .map( ({key,value})=> key==="User.AthCtxt" ? {key, value: deserializeAuthContext(base64.toByteArray(value))} : {key, value} );
+
+
+        return decoded.split(";").map(v=> <div>{v}</div>);
     }
     catch (_ignore) {
         return null;
@@ -161,6 +224,13 @@ class App extends Component {
     }
 
     render() {
+        let textAreaState= {};
+        let resizeTA = function (input) {
+            input.style.minHeight = 'auto';
+            console.log(input.scrollHeight);
+            input.style.minHeight = Math.max(input.scrollHeight, 70) + 'px';
+        };
+
         return (
             <div className="App">
                 <div className="App-header">
@@ -168,7 +238,7 @@ class App extends Component {
                 </div>
                 <main className="App-intro">
                     <textarea
-                        ref="newField"
+                        ref={input=> input? textAreaState.input=input : textAreaState.input && resizeTA(textAreaState.input) }
                         className="the-token"
                         placeholder="Enter the encoded mambo jumbo"
                         onChange={e => this.handleChange(e)}

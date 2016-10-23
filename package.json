@@ -8,10 +8,12 @@
     "react-scripts": "0.6.1"
   },
   "dependencies": {
+    "base64-js": "^1.2.0",
     "lodash": "^4.16.4",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
-    "react-json-pretty": "^1.2.1"
+    "react-json-pretty": "^1.2.1",
+    "utf8": "^2.1.2"
   },
   "scripts": {
     "start": "react-scripts start",
