@@ -32,7 +32,7 @@ function crackJWT(token) {
 
 function tryJWT(token) {
     try {
-        var crackedToken = crackJWT(token);
+        let crackedToken = crackJWT(token);
         return crackedToken && <div key="JWT-result">
                 <aside>JWT</aside>
                 <table>
@@ -95,7 +95,7 @@ function trySkypeToken(token) {
             .replace(/^(Authentication:\s*)?skypetoken=/i,"")
             .trim();
 
-        var crackedToken = crackJWT(token);
+        let crackedToken = crackJWT(token);
 
         if (!crackedToken || !_.every(_.at(crackedToken, "header.kid", "payload.skypeid", "payload.scp"), Boolean)) {
             return null;
@@ -134,11 +134,6 @@ function trySkypeToken(token) {
     }
 }
 
-//[consumed, ...parts]
-function match(re){
-    return input=>input.match(re);
-}
-
 function readUint(byteArray) {
     let result = 0;
     let shift = 0;
@@ -155,6 +150,30 @@ function readUint(byteArray) {
     return [byteArray.slice(pos), result];
 }
 
+function readInt(byteArray, length=4, signed=true) {
+    let result = 0;
+    let shift = 0;
+    let pos = 0;
+    let byte;
+
+    while(length) {
+        byte = byteArray[pos++];
+
+        result |= (byte & 0xff) << shift;
+        shift += 8;
+        length--;
+    }
+    if (signed && (byte & 0x80)) {
+        result -= 2<<shift;
+    }
+    return [byteArray.slice(pos), result];
+}
+
+function readBytes(io, len) {
+    let strBytes = [...io.slice(0, len)];
+    return [io.slice(len), strBytes];
+}
+
 function readString(io) {
     let len;
     [io, len] = readUint(io);
@@ -162,32 +181,79 @@ function readString(io) {
     return [io.slice(len), utf8.decode(strBytes)];
 }
 
-function readPassport(io) {
+function readPp(io) {
+    let prev, pos, result={};
+    prev = pos = io;
 
+    result.as = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.bd = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.bdp = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.cid = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }();
+    result.country = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.dfu = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
+    result.fname = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.fla = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
+    result.gen = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.isid = function(){ let result; [pos, result] = readInt(prev = pos, 4, false); return result; }();
+    result.lp = function(){ let result; [pos, result] = readInt(prev = pos, 2); return result; }();
+    result.lri = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }();
+    result.mname = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.pcode = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.puidh = function(){ let result; [pos, result] = readInt(prev = pos, 4, true); return result; }();
+    result.puidl = function(){ let result; [pos, result] = readInt(prev = pos, 4, true); return result; }();
+    result.rep = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    result.wal = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
+
+    return [pos, result];
 }
 
 function deserializeAuthContext(byteArray) {
-    var prev, pos;
+    let prev, pos;
     prev = pos = byteArray;
 
-    const authType = function(){ var result; [pos, result] = readString(prev = pos); return result; }();
-    const name = function(){ var result; [pos, result] = readString(prev = pos); return result; }();
-    const hasPassport = function(){ var result; [pos, result] = readUint(prev = pos); return result; }();
+    const authType = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    const name = function(){ let result; [pos, result] = readString(prev = pos); return result; }();
+    const hasPp = function(){ let result; [pos, result] = readInt(prev = pos, 1); return result; }();
 
-    const passport = function(){
-        var result;
-        if (hasPassport) {
-            [pos, result] = readPassport(prev = pos);
+    const pp = function(){
+        let result;
+        if (hasPp) {
+            [pos, result] = readPp(prev = pos);
         }
         return result;
     }();
 
-    const numIds = function(){ var result; [pos, result] = readUint(prev = pos); return result; }();
+    const numIds = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
     const identifiers = [];
-    for(var i=0; i< numIds; i++) {
-        let identifier = function(){ var result; [pos, result] = readUint(prev = pos); return result; }();
+    let rui = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; };
+    for(let i=0; i< numIds; i++) {
+        let identifier = rui();
         identifiers.push(identifier);
     }
+
+    const isrea = function(){ let result; [pos, result] = readInt(prev = pos, 1); return result; }();
+    const hassky = function(){ let result; [pos, result] = readInt(prev = pos, 1); return result; }();
+
+    const skyid = function(){
+        let result;
+        if (hassky) {
+            [pos, result] = readString(prev = pos);
+        }
+        return result;
+    }();
+
+    const uictsn = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
+
+    const hastid = function(){ let result; [pos, result] = readInt(prev = pos, 1); return result; }();
+    const tid = function(){
+        let result;
+        if (hastid) {
+            [pos, result] = readBytes(prev = pos, 16);
+        }
+        return result;
+    }();
+
+    return {authType, name, hasPp, pp, numIds, identifiers, isrea, hassky, skyid, uictsn, hastid, tid};
 }
 
 /*
@@ -200,9 +266,9 @@ function tryRegToken(token) {
             .trim()
             .split(";")[0];
 
-        var decoded = atob(token);
+        let decoded = atob(token);
 
-        var entries = _.compact(decoded.split(";"))
+        let entries = _.compact(decoded.split(";"))
             .map(term=>{
                 let [key, , ,value] = term.split(":");
                 return {key, value};

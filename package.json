@@ -13,6 +13,7 @@
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-json-pretty": "^1.2.1",
+    "transducers-js": "^0.4.174",
     "utf8": "^2.1.2"
   },
   "scripts": {
