@@ -4,6 +4,7 @@ import _ from 'lodash';
 import JSONPretty from 'react-json-pretty';
 import base64 from 'base64-js';
 import utf8 from 'utf8';
+import long from 'long';
 
 function getDefaultResult(token) {
     return token ? <div key="default-result"><span>Don't know</span></div> : "";
@@ -101,7 +102,7 @@ function trySkypeToken(token) {
             return null;
         }
 
-        return <div key="JWT-result">
+        return <div key="SkypeToken-result">
             <aside>SkypeToken</aside>
             <table>
                 <tbody>
@@ -226,6 +227,7 @@ function deserializeAuthContext(byteArray) {
     const numIds = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
     const identifiers = [];
     let rui = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; };
+
     for(let i=0; i< numIds; i++) {
         let identifier = rui();
         identifiers.push(identifier);
@@ -253,7 +255,18 @@ function deserializeAuthContext(byteArray) {
         return result;
     }();
 
-    return {authType, name, hasPp, pp, numIds, identifiers, isrea, hassky, skyid, uictsn, hastid, tid};
+    const csid = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
+
+    const numScp = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
+    const scp = [];
+    let rscp = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; };
+
+    for(let i=0; i< numScp; i++) {
+        let scope = rscp();
+        scp.push(scope);
+    }
+
+    return {authType, name, hasPp, pp, numIds, identifiers, isrea, hassky, skyid, uictsn, hastid, tid, csid, numScp, scp};
 }
 
 /*
@@ -275,8 +288,14 @@ function tryRegToken(token) {
             })
             .map( ({key,value})=> key==="User.AthCtxt" ? {key, value: deserializeAuthContext(base64.toByteArray(value))} : {key, value} );
 
-
-        return decoded.split(";").map(v=> <div>{v}</div>);
+        return <div key="RegToken-result">
+            <aside>RegToken</aside>
+            <table>
+                <tbody>
+                { entries.map(e=><tr key={e.key}><td>{e.key}</td><td>{ _.isObject(e.value) ? <JSONPretty json={e.value}></JSONPretty> : e.value }</td></tr>)}
+                </tbody>
+            </table>
+        </div>
     }
     catch (_ignore) {
         return null;
@@ -328,6 +347,7 @@ class App extends Component {
         let tests = _.over(t=>trySkypeToken(t) || tryJWT(t), tryRegToken, tryBase64, getDefaultResult);
 
         state.result = _.first(_.compact(tests(token)));
+        window.long = long;
         this.setState(state);
     }
 }

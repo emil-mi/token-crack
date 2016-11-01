@@ -4,6 +4,12 @@
 
 html {
     height: 100%;
+    font-size: 100%;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
 .App {
@@ -32,6 +38,26 @@ html {
 
 .the-result {
     word-break: break-all;
+}
+
+.the-result aside {
+    text-align: left;
+}
+
+.the-result table {
+    width: 100%;
+}
+
+.the-result tr td {
+    padding: 0 1em;
+}
+
+.the-result tr td:nth-child(odd) {
+    text-align: right;
+}
+
+.the-result tr td:nth-child(even) {
+    text-align: left;
 }
 
 .date_future {
