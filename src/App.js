@@ -142,7 +142,7 @@ function readUint(byteArray) {
     while(true) {
         let byte = byteArray[pos++];
 
-        result |= (byte & 0x7f) << shift;
+        result += (byte & 0x7f) * Math.pow(2, shift);
         if ((byte & 0x80) === 0) {
             break;
         }
@@ -152,7 +152,7 @@ function readUint(byteArray) {
 }
 
 function readInt(byteArray, length=4, signed=true) {
-    let result = 0;
+    let result = long.UZERO;
     let shift = 0;
     let pos = 0;
     let byte;
@@ -160,12 +160,12 @@ function readInt(byteArray, length=4, signed=true) {
     while(length) {
         byte = byteArray[pos++];
 
-        result |= (byte & 0xff) << shift;
+        result = result.add( long.fromInt(byte & 0xff).shiftLeft(shift) );
         shift += 8;
         length--;
     }
     if (signed && (byte & 0x80)) {
-        result -= 2<<shift;
+        result = result.toSigned();
     }
     return [byteArray.slice(pos), result];
 }
@@ -180,6 +180,14 @@ function readString(io) {
     [io, len] = readUint(io);
     let strBytes = String.fromCharCode(...io.slice(0, len));
     return [io.slice(len), utf8.decode(strBytes)];
+}
+
+function readByteFragment(io) {
+    let len, bytes;
+    [io, len] = readInt(io);
+    [io, bytes]= readBytes(io, len);
+    bytes.string = ()=> utf8.decode(String.fromCharCode(...bytes));
+    return [io, bytes];
 }
 
 function readPp(io) {
@@ -266,7 +274,8 @@ function deserializeAuthContext(byteArray) {
         scp.push(scope);
     }
 
-    return {authType, name, hasPp, pp, numIds, identifiers, isrea, hassky, skyid, uictsn, hastid, tid, csid, numScp, scp};
+    return _.cloneDeepWith({authType, name, hasPp, pp, numIds, identifiers, isrea, hassky, skyid, uictsn, hastid, tid, csid, numScp, scp},
+        item=> long.isLong(item) ? item.toString() : undefined);
 }
 
 /*
@@ -279,6 +288,10 @@ function tryRegToken(token) {
             .trim()
             .split(";")[0];
 
+        if (!token) {
+            return;
+        }
+
         let decoded = atob(token);
 
         let entries = _.compact(decoded.split(";"))
@@ -288,6 +301,10 @@ function tryRegToken(token) {
             })
             .map( ({key,value})=> key==="User.AthCtxt" ? {key, value: deserializeAuthContext(base64.toByteArray(value))} : {key, value} );
 
+        if (entries.length === 1) {
+            return;
+        }
+
         return <div key="RegToken-result">
             <aside>RegToken</aside>
             <table>
@@ -296,6 +313,54 @@ function tryRegToken(token) {
                 </tbody>
             </table>
         </div>
+    }
+    catch (_ignore) {
+        return null;
+    }
+}
+
+/*
+ syncState=1a8a39e0d9570100000000000057000000f8b52c52b3d1ecab0d000000656d696c2e6d6965696c696361fd04098c430100000100000000000000000b21412c58010000018a39e0d9570100000b21412c580100000100000000000000000b21412c58010000018a39e0d9570100000b21412c5801000001e00a3807580100000b21412c58010000000000000000000000000000&
+ */
+function trySyncState(state) {
+    try {
+        state = (state.match(/[0-9a-fA-F]{4,}/) || [])[0];
+        if (!state || state.length%2) {
+            return null;
+        }
+
+        let bytes = _.chunk(state, 2)
+            .map(grp=>grp.join(''))
+            .map(byte=>Number.parseInt(byte, 16));
+
+        let prev, pos;
+        prev = pos = bytes;
+
+        const i$ver = function(){ let result; [pos, result] = readInt(prev = pos, 1); return result; }();
+        const sta = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }();
+        const ntwrk = function(){ let result; [pos, result] = readByteFragment(prev = pos); return result.string(); }();
+        const c$flt = function(){ let result; [pos, result] = readInt(prev = pos); return result; }();
+        const cid = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }();
+        const skypeId = function(){ let result; [pos, result] = readByteFragment(prev = pos); return result.string(); }();
+        const ver = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }();
+        const dSeg = _.range(i$ver>=25 ? 5 : 4).map(()=> {
+            const numSegments = function(){ let result; [pos, result] = readInt(prev = pos, 1); return result; }();
+            return _.range(numSegments).map( ()=> {
+                return {
+                    start: function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }(),
+                    end: function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }()
+                };
+            })
+        });
+        const lcVer = function(){ let result; [pos, result] = readInt(prev = pos, 8); return result; }();
+        const lcID = (lcVer > 0) && function(){ let result; [pos, result] = readByteFragment(prev = pos); return result.string(); }();
+        const thID = (i$ver>=25) && function(){ let result; [pos, result] = readByteFragment(prev = pos); return result.string(); }();
+
+        const result = _.cloneDeepWith({i$ver, sta, ntwrk, c$flt, cid, skypeId, ver, dSeg, lcVer, lcID, thID}, item=> long.isLong(item) ? item.toString() : undefined );
+        return <div key="SyncState-result">
+            <aside>SyncState</aside>
+            <div><JSONPretty json={result}></JSONPretty></div>
+        </div>;
     }
     catch (_ignore) {
         return null;
@@ -344,7 +409,7 @@ class App extends Component {
     handleChange(e) {
         let token = (e.target.value || "").trim();
         let state = {token, result: null};
-        let tests = _.over(t=>trySkypeToken(t) || tryJWT(t), tryRegToken, tryBase64, getDefaultResult);
+        let tests = _.over(t=>trySkypeToken(t) || tryJWT(t), tryRegToken, trySyncState, tryBase64, getDefaultResult);
 
         state.result = _.first(_.compact(tests(token)));
         window.long = long;

@@ -63,3 +63,7 @@ table {
 .date_future {
     color: red;
 }
+
+pre {
+    text-align: left;
+}
