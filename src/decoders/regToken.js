@@ -42,7 +42,7 @@ function deserializeAuthContext(byteArray) {
 
     const pp = function(){
         let result;
-        if (hasPp!=0) {
+        if (hasPp !== 0) {
             [pos, result] = readPp(pos);
         }
         return result;
@@ -62,7 +62,7 @@ function deserializeAuthContext(byteArray) {
 
     const skyid = function(){
         let result;
-        if (hassky!=0) {
+        if (hassky !== 0) {
             [pos, result] = readString(pos);
         }
         return result;
@@ -73,7 +73,7 @@ function deserializeAuthContext(byteArray) {
     const hastid = function(){ let result; [pos, result] = readInt(pos, 1); return result; }();
     const tid = function(){
         let result;
-        if (hastid!=0) {
+        if (hastid !== 0) {
             [pos, result] = readBytes(pos, 16);
         }
         return result;

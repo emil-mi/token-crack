@@ -59,16 +59,24 @@ export function cracker(token) {
                     <td>{dateFromEpochSeconds(crackedToken.payload.exp)}</td>
                 </tr>
                 <tr>
-                    <td>SkypeID</td>
-                    <td>{crackedToken.payload.skypeid}</td>
-                </tr>
-                <tr>
                     <td>Serial</td>
                     <td>{crackedToken.payload.csi}</td>
                 </tr>
                 <tr>
                     <td>Scopes</td>
                     <td>{`${getFlagNames(crackedToken.payload.scp, SkypeTokenScopes)} (${crackedToken.payload.scp})`}</td>
+                </tr>
+                <tr>
+                    <td>SkypeID</td>
+                    <td>{crackedToken.payload.skypeid}</td>
+                </tr>
+                <tr>
+                    <td>Tenat</td>
+                    <td>{crackedToken.payload.tid}</td>
+                </tr>
+                <tr>
+                    <td>Region</td>
+                    <td>{crackedToken.payload.rgn}</td>
                 </tr>
                 </tbody>
             </table>
