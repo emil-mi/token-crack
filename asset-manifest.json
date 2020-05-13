@@ -1,21 +1,21 @@
 {
   "files": {
     "main.css": "/token-crack/static/css/main.8b6c4516.chunk.css",
-    "main.js": "/token-crack/static/js/main.91f6a7a0.chunk.js",
-    "main.js.map": "/token-crack/static/js/main.91f6a7a0.chunk.js.map",
-    "runtime-main.js": "/token-crack/static/js/runtime-main.ffebb260.js",
-    "runtime-main.js.map": "/token-crack/static/js/runtime-main.ffebb260.js.map",
-    "static/js/2.c4e3760f.chunk.js": "/token-crack/static/js/2.c4e3760f.chunk.js",
-    "static/js/2.c4e3760f.chunk.js.map": "/token-crack/static/js/2.c4e3760f.chunk.js.map",
+    "main.js": "/token-crack/static/js/main.5c7eee1b.chunk.js",
+    "main.js.map": "/token-crack/static/js/main.5c7eee1b.chunk.js.map",
+    "runtime-main.js": "/token-crack/static/js/runtime-main.47b0f5a0.js",
+    "runtime-main.js.map": "/token-crack/static/js/runtime-main.47b0f5a0.js.map",
+    "static/js/2.c683c42d.chunk.js": "/token-crack/static/js/2.c683c42d.chunk.js",
+    "static/js/2.c683c42d.chunk.js.map": "/token-crack/static/js/2.c683c42d.chunk.js.map",
     "index.html": "/token-crack/index.html",
-    "precache-manifest.38e4f4d12c99476dd82f296bb4c9fd09.js": "/token-crack/precache-manifest.38e4f4d12c99476dd82f296bb4c9fd09.js",
+    "precache-manifest.e9c94c41fe759f80433a5776f2a1ec2e.js": "/token-crack/precache-manifest.e9c94c41fe759f80433a5776f2a1ec2e.js",
     "service-worker.js": "/token-crack/service-worker.js",
     "static/css/main.8b6c4516.chunk.css.map": "/token-crack/static/css/main.8b6c4516.chunk.css.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.ffebb260.js",
-    "static/js/2.c4e3760f.chunk.js",
+    "static/js/runtime-main.47b0f5a0.js",
+    "static/js/2.c683c42d.chunk.js",
     "static/css/main.8b6c4516.chunk.css",
-    "static/js/main.91f6a7a0.chunk.js"
+    "static/js/main.5c7eee1b.chunk.js"
   ]
 }
