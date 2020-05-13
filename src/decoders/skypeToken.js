@@ -51,6 +51,10 @@ export function cracker(token) {
             <table>
                 <tbody>
                 <tr>
+                    <td>Key ID</td>
+                    <td>{crackedToken.header.kid}</td>
+                </tr>
+                <tr>
                     <td>Issued time</td>
                     <td>{dateFromEpochSeconds(crackedToken.payload.iat)}</td>
                 </tr>
