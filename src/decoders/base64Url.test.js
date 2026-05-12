@@ -1,4 +1,4 @@
-import {base64UrlToBytes} from './openid.js';
+import {base64UrlToBytes} from './openid';
 
 describe('base64UrlToBytes', () => {
     test('decodes a standard 4-char base64url string', () => {

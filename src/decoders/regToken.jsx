@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {readString, readInt, readBytes} from './common.js';
+import {readString, readInt, readBytes} from './common';
 import base64 from 'base64-js';
 import long from 'long';
 

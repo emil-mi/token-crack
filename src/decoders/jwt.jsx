@@ -1,10 +1,10 @@
 import React from 'react';
 import JSONPretty from 'react-json-pretty';
 
-import {crackJWT} from './common.js';
-import {describeIssuer} from './issuers.js';
-import {JWT_COLORS} from './jwtColors.js';
-import {JsonWithTimestamps} from './timestamps.js';
+import {crackJWT} from './common';
+import {describeIssuer} from './issuers';
+import {JWT_COLORS} from './jwtColors';
+import {JsonWithTimestamps} from './timestamps';
 
 export function cracker(token) {
     try {

@@ -3,7 +3,7 @@ import {
     epochSecondsToUtc,
     buildJsonSegments,
     jsonStringWithComments,
-} from './timestamps.js';
+} from './timestamps';
 
 describe('TIMESTAMP_FIELDS', () => {
     test('covers iat, nbf, exp and xms_pftexp', () => {

@@ -1,5 +1,5 @@
-import {cracker as entraIdCracker, transformHeaderJsonNonce} from './entraId.js';
-import {cracker as pipelineCracker} from './index.js';
+import {cracker as entraIdCracker, transformHeaderJsonNonce} from './entraId';
+import {cracker as pipelineCracker} from './index';
 
 function b64u(obj) {
     return btoa(JSON.stringify(obj))
