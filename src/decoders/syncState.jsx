@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {readInt, readByteFragment} from './common.js';
+import {readInt, readByteFragment} from './common';
 import long from 'long';
 
 import React from 'react';

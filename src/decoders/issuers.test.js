@@ -1,4 +1,4 @@
-import {issuerName} from './issuers.js';
+import {issuerName} from './issuers';
 
 describe('issuerName', () => {
     test('resolves Microsoft Entra ID for sts.windows.net', () => {

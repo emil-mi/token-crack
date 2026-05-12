@@ -1,6 +1,6 @@
-import {cracker as openidCracker, OpenIdValidator, base64UrlToBytes} from './openid.js';
-import {crackJWT} from './common.js';
-import {issuerName} from './issuers.js';
+import {cracker as openidCracker, OpenIdValidator, base64UrlToBytes} from './openid';
+import {crackJWT} from './common';
+import {issuerName} from './issuers';
 
 function stringToB64Url(s) {
     const bytes = new TextEncoder().encode(s);

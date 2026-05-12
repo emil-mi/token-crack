@@ -1,5 +1,5 @@
-import {cracker as jwtCracker} from './jwt.js';
-import {JWT_COLORS} from './jwtColors.js';
+import {cracker as jwtCracker} from './jwt';
+import {JWT_COLORS} from './jwtColors';
 
 function b64u(obj) {
     return btoa(JSON.stringify(obj))

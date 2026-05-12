@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 
-import {crackJWT} from './common.js';
+import {crackJWT} from './common';
 
 const SkypeTokenScopes = [
     [1, "refresh"],

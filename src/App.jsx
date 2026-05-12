@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import './App.css';
 import _ from 'lodash';
-import {cracker} from './decoders/index.js';
+import {cracker} from './decoders/index';
 
 function renderHighlight(token, regions) {
     if (!token) {

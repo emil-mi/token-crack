@@ -1,4 +1,4 @@
-import {cracker} from './decoders/index.js';
+import {cracker} from './decoders/index';
 
 // The full App component uses React 19 + WebCrypto + DOM APIs that are awkward
 // under jsdom; the App's rendering surface is covered by the underlying decoder

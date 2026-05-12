@@ -1,10 +1,10 @@
 import React from 'react';
 import JSONPretty from 'react-json-pretty';
 
-import {crackJWT} from './common.js';
-import {renderIssuer} from './issuers.js';
-import {JWT_COLORS} from './jwtColors.js';
-import {JsonWithTimestamps} from './timestamps.js';
+import {crackJWT} from './common';
+import {renderIssuer} from './issuers';
+import {JWT_COLORS} from './jwtColors';
+import {JsonWithTimestamps} from './timestamps';
 
 export function base64UrlToBytes(s, label = 'value') {
     if (typeof s !== 'string' || s.length === 0) {

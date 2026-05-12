@@ -1,6 +1,6 @@
-import {cracker as openidCracker} from './openid.js';
-import {cracker as pipelineCracker} from './index.js';
-import {JWT_COLORS} from './jwtColors.js';
+import {cracker as openidCracker} from './openid';
+import {cracker as pipelineCracker} from './index';
+import {JWT_COLORS} from './jwtColors';
 
 function b64u(obj) {
     return btoa(JSON.stringify(obj))
