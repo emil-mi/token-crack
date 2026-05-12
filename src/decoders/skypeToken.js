@@ -34,19 +34,32 @@ function dateFromEpochSeconds(seconds, betterBeInTheFuture = false) {
 /*
  Authentication:skypetoken=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IjIifQ.eyJpYXQiOjE0NzcxNzYwMjcsImV4cCI6MTQ3NzI2MjQyNywic2t5cGVpZCI6ImVtaWwubWllaWxpY2EiLCJzY3AiOjk1OCwiY3NpIjoiOCIsImNpZCI6ImFiZWNkMWIzNTIyY2I1ZjgiLCJhYXQiOjE0NzcwMDc2NjR9.ck4dDkv9nqwj1-rGRh9CGxduMBYgAv0iA3ebPNefgDsWaqnQGgiTjrPatppN7I8P3-mRhiA3qphaai1C4ZiuM-5oByWGC7NvKWeD-vIikqQ_GlsMEtqXEd6kUXSZTnFE3AlZuwW7JeqTZSr8DibKpj2OMriWCEYueZvZ3nCXxH972U5f6PZCln_Uz3IlKASX8Iiw6RZ1c3-5Gzlk
  */
-export function cracker(token) {
+export function cracker(rawToken) {
     try {
-        token = token
-            .replace(/^(Authentication:\s*)?skypetoken=/i,"")
+        const stripped = rawToken
+            .replace(/^(Authentication:\s*)?skypetoken=/i, "")
             .trim();
+        const offset = rawToken.indexOf(stripped);
 
-        let crackedToken = crackJWT(token);
+        let crackedToken = crackJWT(stripped);
 
         if (!crackedToken || !_.every(_.at(crackedToken, "header.kid", "payload.skypeid", "payload.scp"), Boolean)) {
             return null;
         }
 
-        return <div key="SkypeToken-result">
+        const parts = stripped.split('.');
+        const hLen = parts[0].length;
+        const pLen = parts[1].length;
+        const sLen = parts[2].length;
+        const base = offset < 0 ? 0 : offset;
+        const regions = [
+            {start: base, end: base + hLen, color: '#c62828', title: 'header'},
+            {start: base + hLen + 1, end: base + hLen + 1 + pLen, color: '#1565c0', title: 'payload'},
+            {start: base + hLen + 1 + pLen + 1, end: base + hLen + 1 + pLen + 1 + sLen, color: '#2e7d32', title: 'signature'},
+        ];
+        const info = <span>This token was issued by Skype.</span>;
+
+        const details = <div key="SkypeToken-result">
             <aside>SkypeToken</aside>
             <table>
                 <tbody>
@@ -85,6 +98,8 @@ export function cracker(token) {
                 </tbody>
             </table>
         </div>;
+
+        return {regions, info, details};
     }
     catch (_ignore) {
         return null;
