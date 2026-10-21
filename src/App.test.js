@@ -21,6 +21,13 @@ describe('cracker pipeline entry point', () => {
         expect(cracker('!!!not-a-token!!!')).toEqual([]);
     });
 
+    test('decodes standalone URL-safe Base64 input', () => {
+        const results = cracker('Pz8_Pj4-');
+
+        expect(results).toHaveLength(1);
+        expect(results[0].props.children[1].props.children).toBe('???>>>');
+    });
+
     test('recognizes compact JWE input', () => {
         const token = `${b64uJson({alg: 'dir', enc: 'A256GCM'})}..AQID.BAUG.BwgJ`;
         const results = cracker(token);
