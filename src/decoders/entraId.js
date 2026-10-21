@@ -1,5 +1,5 @@
-import {cracker as openidCracker, OpenIdValidator, base64UrlToBytes} from './openid';
-import {crackJWT} from './common';
+import {cracker as openidCracker, OpenIdValidator} from './openid';
+import {base64UrlToBytes, crackJWT} from './common';
 import {issuerName} from './issuers';
 
 function stringToB64Url(s) {

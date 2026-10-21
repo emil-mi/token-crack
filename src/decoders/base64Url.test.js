@@ -1,4 +1,4 @@
-import {base64UrlToBytes} from './openid';
+import {base64UrlToBytes} from './common';
 
 describe('base64UrlToBytes', () => {
     test('decodes a standard 4-char base64url string', () => {

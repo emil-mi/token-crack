@@ -1,34 +1,10 @@
 import React from 'react';
 import JSONPretty from 'react-json-pretty';
 
-import {crackJWT} from './common';
+import {base64UrlToBytes, crackJWT} from './common';
 import {renderIssuer} from './issuers';
 import {JWT_COLORS} from './jwtColors';
 import {JsonWithTimestamps} from './timestamps';
-
-export function base64UrlToBytes(s, label = 'value') {
-    if (typeof s !== 'string' || s.length === 0) {
-        throw new Error(`${label} is empty`);
-    }
-    if (/[^A-Za-z0-9_\-=]/.test(s)) {
-        throw new Error(`${label} contains characters that are not valid base64url`);
-    }
-    const stripped = s.replace(/=+$/, '');
-    if (stripped.length % 4 === 1) {
-        throw new Error(`${label} has ${stripped.length} base64url chars, which is not a valid length — the token looks truncated`);
-    }
-    let padded = stripped.replace(/-/g, '+').replace(/_/g, '/');
-    while (padded.length % 4) padded += '=';
-    let bin;
-    try {
-        bin = atob(padded);
-    } catch (e) {
-        throw new Error(`${label} is not valid base64url: ${e.message || e}`);
-    }
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return bytes;
-}
 
 function looksLikeUrl(s) {
     return typeof s === 'string' && /^https?:\/\//i.test(s);
